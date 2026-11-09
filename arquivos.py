@@ -791,6 +791,29 @@ def configurar(app):
         )
         return pagina("armazenamento", categorias=categorias, resumo=resumo())
 
+    @app.template_global("distribuicao_armazenamento")
+    def distribuicao_armazenamento():
+        tipos = banco().execute(
+            """SELECT extensao, COUNT(*) AS quantidade, SUM(tamanho) AS tamanho
+               FROM arquivos f WHERE excluido_em IS NULL AND """
+            + ACESSO_SQL
+            + " GROUP BY extensao ORDER BY tamanho DESC, extensao",
+            escopo(),
+        ).fetchall()
+        total = sum(item["tamanho"] for item in tipos)
+        cores = ("#2563eb", "#008577", "#a14bc0", "#db7621", "#db4566",
+                 "#5b6cbc", "#7b8d21", "#00a1c4", "#965b3f")
+        fatias = []
+        inicio = 0
+        for i, item in enumerate(tipos):
+            percentual = 100 * item["tamanho"] / total if total else 0
+            fatias.append(dict(item) | {
+                "percentual": percentual, "inicio": inicio,
+                "cor": cores[i % len(cores)],
+            })
+            inicio += percentual
+        return fatias
+
     @app.template_filter("tamanho")
     def tamanho(valor):
         valor = float(valor or 0)

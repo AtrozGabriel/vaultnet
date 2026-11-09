@@ -1,3 +1,4 @@
+{% from 'macros.html' import pizza_armazenamento %}
 {% if tipo == "arquivos" %}
     <form class="card toolbar" method="get"><div class="search-field">{{ icon("search") }}<input name="q"
        value="{{ request.args.get('q', '')[:80] }}"
@@ -219,6 +220,29 @@
                       max="{{ armazenamento.quota }}"
                       aria-label="Uso do armazenamento"></progress>
             <div class="storage-legend"><span>{{ armazenamento.usado|tamanho }} usados</span><span>{{ (armazenamento.quota - armazenamento.usado)|tamanho }} disponíveis</span></div>
+        </div>
+    </section>
+    <section class="card">
+        <div class="card-heading"><h2>Armazenamento por tipo de arquivo</h2></div>
+        <div class="card-body">
+            <p class="small muted">Espaço dos arquivos que você pode acessar, sem contar a lixeira.</p>
+            {% set fatias = distribuicao_armazenamento() %}
+            {% if fatias %}
+                <div class="storage-pie-layout">
+                    {{ pizza_armazenamento(fatias) }}
+                    <ul class="storage-pie-legend">
+                        {% for fatia in fatias %}
+                            <li>
+                                <svg width="12" height="12" viewBox="0 0 12 12" aria-hidden="true"><circle cx="6" cy="6" r="5" fill="{{ fatia.cor }}" /></svg>
+                                <strong>{{ fatia.extensao|upper }}</strong>
+                                <span>{{ fatia.quantidade }} arquivo{{ 's' if fatia.quantidade != 1 else '' }} · {{ fatia.tamanho|tamanho }} · {{ ('%.1f'|format(fatia.percentual))|replace('.', ',') }}%</span>
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+            {% else %}
+                <p class="muted">Nenhum arquivo disponível para exibir.</p>
+            {% endif %}
         </div>
     </section>
     <section class="card"><div class="card-heading"><h2>Seus documentos por categoria</h2></div>{% if categorias %}<div class="table-scroll"><table><thead><tr><th>Categoria</th><th>Documentos</th><th>Conteúdo</th></tr></thead><tbody>{% for item in categorias %}<tr><td>{{ item.categoria }}</td><td>{{ item.quantidade }}</td><td>{{ item.tamanho|tamanho }}</td></tr>{% endfor %}</tbody></table></div>{% else %}{{ vazio('Ainda há espaço para começar', 'Envie um documento para acompanhar o armazenamento.', 'storage') }}{% endif %}</section>

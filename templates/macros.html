@@ -23,9 +23,25 @@
 {% macro vazio(titulo,descricao,icone='files') -%}<div class="empty-state"><div class="empty-icon">{{ icon(icone) }}</div><h3>{{ titulo }}</h3><p>{{ descricao }}</p></div>{%- endmacro %}
 {% macro status(arquivo) -%}<span class="badge {{ 'badge-green' if arquivo.scanner in ['clamav','defender'] else 'badge-amber' }}"><span class="status-dot"></span>{{ 'Verificado pelo antivírus' if arquivo.scanner in ['clamav','defender'] else 'Demonstração · sem antivírus' }}</span>{%- endmacro %}
 {% macro file_name(arquivo) -%}<div class="file-name"><span class="file-type type-{{ arquivo.extensao }}">{{ icon("files") }}</span><div><a href="{{ url_for('arquivos.detalhe', file_id=arquivo.id) }}">{{ arquivo.nome }}</a><small>{{ arquivo.categoria }} · {{ arquivo|acesso_nome }}</small></div></div>{%- endmacro %}
-{% macro tabela_arquivos(arquivos) -%}
-    {% if arquivos %}<div class="table-scroll"><table><thead><tr><th>Arquivo</th><th>Enviado por</th><th>Data</th><th>Tamanho</th><th>Status</th><th><span class="sr-only">Ações</span></th></tr></thead><tbody>{% for arquivo in arquivos %}<tr><td>{{ file_name(arquivo) }}</td><td><span class="person-name"><span class="avatar avatar-small">{{ arquivo.dono[:2]|upper }}</span>{{ arquivo.dono }}</span></td><td class="muted nowrap">{{ arquivo.criado|horario }}</td><td class="muted nowrap">{{ arquivo.tamanho|tamanho }}</td><td>{{ status(arquivo) }}</td><td><a class="icon-button"
+{% macro tabela_arquivos(arquivos, mostrar_download=true) -%}
+    {% if arquivos %}<div class="table-scroll"><table><thead><tr><th>Arquivo</th><th>Enviado por</th><th>Data</th><th>Tamanho</th><th>Status</th>{% if mostrar_download %}<th><span class="sr-only">Ações</span></th>{% endif %}</tr></thead><tbody>{% for arquivo in arquivos %}<tr><td>{{ file_name(arquivo) }}</td><td><span class="person-name"><span class="avatar avatar-small">{{ arquivo.dono[:2]|upper }}</span>{{ arquivo.dono }}</span></td><td class="muted nowrap">{{ arquivo.criado|horario }}</td><td class="muted nowrap">{{ arquivo.tamanho|tamanho }}</td><td>{{ status(arquivo) }}</td>{% if mostrar_download %}<td><a class="icon-button"
    href="{{ url_for('arquivos.baixar', file_id=arquivo.id) }}"
    title="Baixar {{ arquivo.nome }}"
-   aria-label="Baixar {{ arquivo.nome }}">{{ icon("download") }}</a></td></tr>{% endfor %}</tbody></table></div>{% else %}{{ vazio('Tudo pronto para começar', 'Os documentos enviados aparecerão aqui.') }}{% endif %}
+   aria-label="Baixar {{ arquivo.nome }}">{{ icon("download") }}</a></td>{% endif %}</tr>{% endfor %}</tbody></table></div>{% else %}{{ vazio('Tudo pronto para começar', 'Os documentos enviados aparecerão aqui.') }}{% endif %}
+{%- endmacro %}
+
+{% macro pizza_armazenamento(fatias, mini=false) -%}
+<svg class="storage-pie{{ ' storage-pie-mini' if mini else '' }}" viewBox="0 0 100 100"
+     role="img" aria-label="Distribuição do espaço por tipo de arquivo">
+    <title>Distribuição do espaço por tipo de arquivo</title>
+    <circle cx="50" cy="50" r="49" fill="#94a3b8" />
+    {% for fatia in fatias if fatia.percentual > 0 %}
+        <circle cx="50" cy="50" r="24.5" fill="none" stroke="{{ fatia.cor }}"
+                stroke-width="49" pathLength="100"
+                stroke-dasharray="{{ fatia.percentual }} {{ 100 - fatia.percentual }}"
+                stroke-dashoffset="{{ -fatia.inicio }}" transform="rotate(-90 50 50)">
+            <title>{{ fatia.extensao|upper }} · {{ fatia.tamanho|tamanho }}</title>
+        </circle>
+    {% endfor %}
+</svg>
 {%- endmacro %}

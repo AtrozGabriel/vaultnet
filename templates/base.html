@@ -117,9 +117,6 @@
                 <main id="conteudo" class="app-main">
                     <div class="page-heading"><div><p class="eyebrow">VAULTNET / {{ titulos.get(tipo, 'ÁREA INTERNA')|upper }}</p><h1>{{ titulos.get(tipo, 'Área interna') }}</h1><p>{% if tipo == "painel" %}Olá, {{ usuario.nome }}. Seus documentos e acessos em um só lugar.{% elif tipo == "arquivos" %}{{ 'Supervisione os documentos de todos os usuários.' if todos_arquivos else ('Documentos enviados por outras pessoas para você, seu setor, seu nível ou toda a equipe.' if compartilhados else 'Documentos enviados por você, privados ou compartilhados.') }}{% elif tipo == "administracao" %}Gerencie contas e acompanhe os eventos de acesso.{% elif tipo == "perfil" %}Confira sua conta, proteção e sessões.{% elif tipo == "enviar" %}Escolha um documento e defina quem pode acessá-lo.{% else %}Organização e controle na sua rede interna.{% endif %}</p></div>{% if tipo in ["painel","arquivos"] %}<a class="button" href="{{ url_for('arquivos.enviar') }}">{{ icon("upload") }} Enviar arquivo</a>{% endif %}</div>
                     {% block conteudo %}{% endblock %}
-                    <footer class="app-footer">
-                        <span>VaultNet · Rede interna</span><span>Atendente · Supervisor · Administrador</span>
-                    </footer>
                 </main>
             </div>
         {% endif %}

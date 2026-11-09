@@ -2247,3 +2247,28 @@ tbody tr:hover {
 .profile-account-actions > .button { width: 100%; min-height: 40px; padding: .55rem .65rem; white-space: nowrap; justify-content: center; box-sizing: border-box; }
 .profile-photo-column { max-width: 100%; }
 @media (max-width: 640px) { .profile-hero:has(.profile-photo-column) { flex-direction: column; align-items: center; text-align: center; } }
+
+/* Permissões no cartão do perfil e distribuição do armazenamento. */
+.profile-stat { position: relative; overflow: visible; }
+.profile-permissions summary { cursor: pointer; font-size: .875rem; }
+.profile-permissions[open] .permissions-popover {
+    position: absolute;
+    inset-block-start: calc(100% + .375rem);
+    inset-inline-end: 0;
+    width: min(24rem, calc(100vw - 3rem));
+    z-index: 8;
+    box-shadow: 0 12px 28px #0003;
+}
+ 
+.storage-pie-layout {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 1.5rem;
+    margin-top: 1rem;
+}
+.storage-pie { display: block; width: min(100%, 13rem); height: auto; }
+.storage-pie-link { display: inline-flex; width: 2.5rem; }
+.storage-pie-mini { width: 2.5rem; }
+.storage-pie-legend { display: grid; gap: .65rem; list-style: none; padding: 0; margin: 0; }
+.storage-pie-legend li { display: flex; align-items: center; flex-wrap: wrap; gap: .45rem; }
