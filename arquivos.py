@@ -366,7 +366,7 @@ def listar(limite=100, compartilhados=False, deslocamento=0):
     )
 
 
-def dados_pagina(compartilhados=False, lixeira=False):
+def dados_pagina(compartilhados=False, lixeira=False, limite=100):
     recebido = request.args.get("pagina", "1")
     if not re.fullmatch(r"[0-9]{1,9}", recebido) or int(recebido) < 1:
         abort(400, description="Página inválida. Use um número a partir de 1.")
@@ -384,9 +384,9 @@ def dados_pagina(compartilhados=False, lixeira=False):
         )
         .fetchone()[0]
     )
-    paginas = max(1, (total + 99) // 100)
+    paginas = max(1, (total + limite - 1) // limite)
     numero = min(int(recebido), paginas)
-    deslocamento = (numero - 1) * 100
+    deslocamento = (numero - 1) * limite
     if lixeira:
         itens = (
             banco()
@@ -394,17 +394,18 @@ def dados_pagina(compartilhados=False, lixeira=False):
                 # A condição da lixeira é fixa; o deslocamento é um parâmetro.
                 "SELECT f.*,u.nome AS dono FROM arquivos f JOIN usuarios u ON u.id=f.dono_id "  # nosec B608
                 + condicao
-                + " ORDER BY f.excluido_em DESC,f.id DESC LIMIT 100 OFFSET ?",
-                (deslocamento,),
+                + " ORDER BY f.excluido_em DESC,f.id DESC LIMIT ? OFFSET ?",
+                (limite, deslocamento),
             )
             .fetchall()
         )
     else:
-        itens = listar(compartilhados=compartilhados, deslocamento=deslocamento)
+        itens = listar(limite=limite, compartilhados=compartilhados, deslocamento=deslocamento)
     return {
         "arquivos": itens,
         "paginacao": {
             "total": total,
+            "limite": limite,
             "pagina": numero,
             "paginas": paginas,
             "inicio": deslocamento + 1 if total else 0,
@@ -497,7 +498,7 @@ def configurar(app):
     def lista():
         return pagina(
             "arquivos",
-            **dados_pagina(),
+            **dados_pagina(limite=12),
             categorias=CATEGORIAS,
             tipos=sorted(TIPOS),
             compartilhados=False,
@@ -508,7 +509,7 @@ def configurar(app):
     def compartilhados():
         return pagina(
             "arquivos",
-            **dados_pagina(compartilhados=True),
+            **dados_pagina(compartilhados=True, limite=12),
             categorias=CATEGORIAS,
             tipos=sorted(TIPOS),
             compartilhados=True,
@@ -626,6 +627,10 @@ def configurar(app):
     def detalhe(file_id):
         return pagina("detalhe", arquivo=obter(file_id), categorias=CATEGORIAS, **dados_destinos())
 
+    @app.template_global()
+    def pode_baixar():
+        return g.usuario["perfil"] != "atendente"
+
     @bp.get("/arquivos/<file_id>/baixar")
     @protegido("ler")
     def baixar(file_id):
@@ -636,9 +641,16 @@ def configurar(app):
     def previa(file_id):
         return entregar_arquivo(file_id, previa=True)
 
-    def entregar_arquivo(file_id, previa=False):
+    @bp.get("/arquivos/<file_id>/miniatura")
+    @protegido("ler")
+    def miniatura(file_id):
+        return entregar_arquivo(file_id, previa=True, miniatura=True)
+
+    def entregar_arquivo(file_id, previa=False, miniatura=False):
         with transacao():
             revalidar(permissao="ler")
+            if not previa and not pode_baixar():
+                abort(403, description="Seu perfil não permite baixar arquivos.")
             arquivo = obter(file_id)
             if (
                 arquivo["scanner"] not in SCANNERS_VERIFICADOS
@@ -652,6 +664,11 @@ def configurar(app):
                         "disponibilizá-lo no modo padrão."
                     ),
                 )
+            if miniatura and (
+                arquivo["extensao"] not in {"pdf", "png", "jpg", "jpeg"}
+                or arquivo["tamanho"] > 8 * 1024 * 1024
+            ):
+                abort(415)
             try:
                 # Leitura limitada também protege contra um disco adulterado ou arquivo substituído.
                 with caminho_arquivo(file_id).open("rb") as origem:
@@ -674,7 +691,8 @@ def configurar(app):
             }
             if previa and arquivo["extensao"] not in tipos_previa:
                 abort(415, description="Prévia indisponível para este formato. Baixe o arquivo para abrir.")
-            registrar(("arquivo_visualizado:" if previa else "arquivo_baixado:") + file_id, g.usuario["id"])
+            if not miniatura:
+                registrar(("arquivo_visualizado:" if previa else "arquivo_baixado:") + file_id, g.usuario["id"])
         return send_file(
             io.BytesIO(dados),
             mimetype=tipos_previa[arquivo["extensao"]] if previa else "application/octet-stream",

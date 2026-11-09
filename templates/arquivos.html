@@ -9,7 +9,7 @@
     <section class="card">
         <div class="card-heading">
             <h2>{{ paginacao.total }} arquivo{{ 's' if paginacao.total != 1 else '' }} encontrado{{ 's' if paginacao.total != 1 else '' }}</h2>
-            <span class="small muted">Até 100 resultados por página</span>
+            <span class="small muted">Até {{ paginacao.limite }} resultados por página</span>
         </div>
         {{ tabela_arquivos(arquivos) }}
         {{ navegacao_paginas(paginacao) }}
@@ -121,7 +121,9 @@
                     <h3>Prévia do documento</h3>
                     <p class="small muted" data-preview-info role="status">Carregando prévia…</p>
                     <div data-preview-content></div>
+                    {% if pode_baixar() %}
                     <a class="text-link" href="{{ url_for('arquivos.baixar', file_id=arquivo.id) }}">Baixar para abrir no seu dispositivo</a>
+                    {% endif %}
                 </section>
                 <dl class="detail-list">
                     <div>
@@ -155,31 +157,43 @@
                         </dd>
                     </div>
                 </dl>
+                {% if pode_baixar() %}
                 <a class="button full"
                    href="{{ url_for('arquivos.baixar', file_id=arquivo.id) }}">{{ icon("download") }} Baixar arquivo</a>
-                <div class="protected-link">
-                    <label for="link-arquivo">Link interno do documento</label>
-                    <div class="copy-field">
-                        <input id="link-arquivo"
-                               value="{{ url_for('arquivos.detalhe', file_id=arquivo.id, _external=True) }}"
-                               readonly><button class="button button-secondary"
-        type="button"
-        data-copy="link-arquivo">Copiar</button>
-                    </div>
-                    <p class="small muted">O link mantém as mesmas permissões e exige login. Somente o público selecionado, o remetente e os administradores podem abrir o documento.</p>
-                </div>
+                {% endif %}
             </div>
         </section>
         <aside>
-            {% if "editar" in permissoes %}<section class="card"><div class="card-heading"><h2>Editar informações</h2></div><form method="post"
+            {% if "editar" in permissoes %}<dialog id="editar-documento" class="card dialog-documento" aria-labelledby="titulo-editar-documento">
+                <div class="card-heading"><h2 id="titulo-editar-documento">Editar informações</h2>
+                    <button class="button button-secondary button-small" type="button"
+                            commandfor="editar-documento" command="close">Fechar</button>
+                </div>
+                <form method="post"
       action="{{ url_for('arquivos.editar', file_id=arquivo.id) }}"
       class="card-body form-stack">{{ csrf() }}<div class="field"><label for="nome-arquivo">Nome do documento</label><input id="nome-arquivo"
        name="nome"
        value="{{ arquivo.nome }}"
        maxlength="120"
-       required></div><div class="field"><label for="categoria">Categoria</label><select id="categoria" name="categoria">{% for item in categorias %}<option {{ 'selected' if item == arquivo.categoria else '' }}>{{ item }}</option>{% endfor %}</select></div>{% include 'destinatario.html' %}<div class="field"><label for="descricao">Descrição</label><textarea id="descricao" name="descricao" maxlength="500" rows="3">{{ arquivo.descricao }}</textarea></div><button class="button full" type="submit">Salvar alterações</button><p class="small muted">Preserve a extensão. Somente o proprietário ou o administrador pode alterar quem acessa.</p></form></section>{% endif %}
-            {% if "excluir" in permissoes %}<section class="card"><div class="card-heading"><h2>Gerenciar documento</h2></div><div class="card-body"><p class="small muted">O arquivo pode ser restaurado enquanto estiver na lixeira.</p><form method="post"
-      action="{{ url_for('arquivos.excluir', file_id=arquivo.id) }}">{{ csrf() }}<button class="button button-danger full" type="submit">{{ icon("trash") }} Mover para a lixeira</button></form></div></section>{% endif %}
+       required></div><div class="field"><label for="categoria">Categoria</label><select id="categoria" name="categoria">{% for item in categorias %}<option {{ 'selected' if item == arquivo.categoria else '' }}>{{ item }}</option>{% endfor %}</select></div>{% include 'destinatario.html' %}<div class="field"><label for="descricao">Descrição</label><textarea id="descricao" name="descricao" maxlength="500" rows="3">{{ arquivo.descricao }}</textarea></div><button class="button full" type="submit">Salvar alterações</button><p class="small muted">Preserve a extensão. Somente o proprietário ou o administrador pode alterar quem acessa.</p></form></dialog>{% endif %}
+            {% if "editar" in permissoes or "excluir" in permissoes %}
+            <section class="card">
+                <div class="card-heading"><h2>Gerenciar documento</h2></div>
+                <div class="card-body form-stack">
+                    {% if "editar" in permissoes %}
+                    <button class="button full" type="button"
+                            commandfor="editar-documento" command="show-modal">Editar informações</button>
+                    {% endif %}
+                    {% if "excluir" in permissoes %}
+                    <form method="post" action="{{ url_for('arquivos.excluir', file_id=arquivo.id) }}">
+                        {{ csrf() }}
+                        <button class="button button-danger full" type="submit">{{ icon("trash") }} Mover para a lixeira</button>
+                    </form>
+                    <p class="small muted">O arquivo pode ser restaurado enquanto estiver na lixeira.</p>
+                    {% endif %}
+                </div>
+            </section>
+            {% endif %}
             <section class="card">
                 <div class="card-heading">
                     <h2>Integridade</h2>
@@ -187,10 +201,6 @@
                 </div>
                 <div class="card-body">
                     <p class="small muted">O conteúdo é protegido no armazenamento e verificado antes de cada download.</p>
-                    <details>
-                        <summary>Ver resumo SHA-256</summary>
-                        <code class="hash-code">{{ arquivo.sha256 }}</code>
-                    </details>
                 </div>
             </section>
         </aside>

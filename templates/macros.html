@@ -22,8 +22,20 @@
    {% if ativo %}aria-current="page"{% endif %}>{{ icon(icone) }}<span>{{ rotulo }}</span></a>{%- endmacro %}
 {% macro vazio(titulo,descricao,icone='files') -%}<div class="empty-state"><div class="empty-icon">{{ icon(icone) }}</div><h3>{{ titulo }}</h3><p>{{ descricao }}</p></div>{%- endmacro %}
 {% macro status(arquivo) -%}<span class="badge {{ 'badge-green' if arquivo.scanner in ['clamav','defender'] else 'badge-amber' }}"><span class="status-dot"></span>{{ 'Verificado pelo antivírus' if arquivo.scanner in ['clamav','defender'] else 'Demonstração · sem antivírus' }}</span>{%- endmacro %}
-{% macro file_name(arquivo) -%}<div class="file-name"><span class="file-type type-{{ arquivo.extensao }}">{{ icon("files") }}</span><div><a href="{{ url_for('arquivos.detalhe', file_id=arquivo.id) }}">{{ arquivo.nome }}</a><small>{{ arquivo.categoria }} · {{ arquivo|acesso_nome }}</small></div></div>{%- endmacro %}
+{% macro file_name(arquivo) -%}
+    {% set detalhe = url_for('arquivos.detalhe', file_id=arquivo.id) %}
+    <div class="file-name">
+        <a class="file-type file-thumbnail type-{{ arquivo.extensao }}" href="{{ detalhe }}"
+           aria-label="Visualizar {{ arquivo.nome }}"
+           {% if arquivo.extensao in ['pdf', 'png', 'jpg', 'jpeg'] and arquivo.tamanho <= 8388608 %}
+           data-thumbnail-url="{{ url_for('arquivos.miniatura', file_id=arquivo.id) }}"
+           data-thumbnail-type="{{ arquivo.extensao }}"
+           {% endif %}>{{ icon("files") }}</a>
+        <div><a href="{{ detalhe }}">{{ arquivo.nome }}</a><small>{{ arquivo.categoria }} · {{ arquivo|acesso_nome }}</small></div>
+    </div>
+{%- endmacro %}
 {% macro tabela_arquivos(arquivos, mostrar_download=true) -%}
+    {% set mostrar_download = mostrar_download and pode_baixar() %}
     {% if arquivos %}<div class="table-scroll"><table><thead><tr><th>Arquivo</th><th>Enviado por</th><th>Data</th><th>Tamanho</th><th>Status</th>{% if mostrar_download %}<th><span class="sr-only">Ações</span></th>{% endif %}</tr></thead><tbody>{% for arquivo in arquivos %}<tr><td>{{ file_name(arquivo) }}</td><td><span class="person-name"><span class="avatar avatar-small">{{ arquivo.dono[:2]|upper }}</span>{{ arquivo.dono }}</span></td><td class="muted nowrap">{{ arquivo.criado|horario }}</td><td class="muted nowrap">{{ arquivo.tamanho|tamanho }}</td><td>{{ status(arquivo) }}</td>{% if mostrar_download %}<td><a class="icon-button"
    href="{{ url_for('arquivos.baixar', file_id=arquivo.id) }}"
    title="Baixar {{ arquivo.nome }}"

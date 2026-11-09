@@ -15,6 +15,7 @@
         <link rel="stylesheet"
               href="{{ url_for('static', filename='estilo.css') }}">
         <script src="{{ url_for('static', filename='interface.js') }}" defer></script>
+        <script type="module" src="{{ url_for('static', filename='miniaturas.mjs') }}"></script>
     </head>
     <body class="{{ 'auth-body' if acesso else 'app-body' }}">
         <a class="skip-link" href="#conteudo">Ir ao conteúdo</a>

@@ -7,7 +7,7 @@
         <span>Seu perfil</span>
         <details class="profile-permissions">
             <summary>Ver permissões</summary>
-            <section class="card permissions-popover"><div class="card-heading"><h2>Permissões da conta</h2><span class="badge badge-blue">{{ usuario.perfil|capitalize }}</span></div><div class="card-body permissions-list">{% for nome,rotulo in [('ler','Consultar e baixar arquivos'),('enviar','Enviar documentos'),('editar','Editar informações de arquivos'),('excluir','Gerenciar a lixeira'),('administrar','Administrar contas e registros')] %}<div><span>{{ rotulo }}</span><span class="{{ 'permission-yes' if nome in permissoes else 'muted' }}">{{ 'Permitido' if nome in permissoes else 'Restrito' }}</span></div>{% endfor %}</div></section>
+            <section class="card permissions-popover"><div class="card-heading"><h2>Permissões da conta</h2><span class="badge badge-blue">{{ usuario.perfil|capitalize }}</span></div><div class="card-body permissions-list">{% for nome,rotulo in [('ler','Consultar arquivos'),('baixar','Baixar arquivos'),('enviar','Enviar documentos'),('editar','Editar informações de arquivos'),('excluir','Gerenciar a lixeira'),('administrar','Administrar contas e registros')] %}<div><span>{{ rotulo }}</span><span class="{{ 'permission-yes' if (pode_baixar() if nome == "baixar" else nome in permissoes) else 'muted' }}">{{ 'Permitido' if (pode_baixar() if nome == "baixar" else nome in permissoes) else 'Restrito' }}</span></div>{% endfor %}</div></section>
         </details>
     </article>
 </div>
