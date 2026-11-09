@@ -1,0 +1,88 @@
+"""Servidor HTTP direto com Waitress, sem confiar em cabeçalhos de proxy."""
+
+import http.client
+import ipaddress
+import re
+import threading
+import time
+
+from waitress import create_server
+
+
+def validar_host(host):
+    host = host.strip().lower()
+    if len(host) > 253 or not all(
+        re.fullmatch(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?", parte)
+        for parte in host.split(".")
+    ):
+        raise ValueError(
+            "Informe somente o nome ou IPv4 do servidor, sem protocolo ou porta."
+        )
+    return host
+
+
+def _aguardar_http(thread, host, porta, prazo=10):
+    fim = time.monotonic() + prazo
+    while time.monotonic() < fim:
+        if not thread.is_alive():
+            raise RuntimeError("O servidor HTTP encerrou durante a preparação.")
+        conexao = http.client.HTTPConnection(host, porta, timeout=0.5)
+        try:
+            conexao.request("HEAD", "/static/favicon.svg")
+            resposta = conexao.getresponse()
+            resposta.read()
+            if resposta.status == 200:
+                return
+        except OSError:
+            pass
+        finally:
+            conexao.close()
+        time.sleep(0.1)
+    raise RuntimeError(
+        "O servidor HTTP não ficou disponível. Confira a porta e o endereço."
+    )
+
+
+def servir_http(
+    app, porta=8080, host="127.0.0.1", host_login="127.0.0.1", ao_iniciar=None
+):
+    if not 1 <= porta <= 65535:
+        raise ValueError("Informe uma porta de 1 a 65535.")
+    host_login = validar_host(host_login)
+    endereco_escuta = ipaddress.ip_address(host)
+    redes = [
+        ipaddress.ip_network(r, strict=False) for r in app.config["ALLOWED_NETWORKS"]
+    ]
+    if not endereco_escuta.is_loopback and all(
+        r.network_address.is_loopback and r.broadcast_address.is_loopback for r in redes
+    ):
+        raise ValueError(
+            "Para escutar na LAN, configure explicitamente as subredes autorizadas."
+        )
+    servidor = create_server(
+        app,
+        host=str(endereco_escuta),
+        port=porta,
+        threads=4,
+        trusted_proxy=None,
+        clear_untrusted_proxy_headers=True,
+        url_scheme="http",
+        expose_tracebacks=False,
+        max_request_body_size=app.config["MAX_FILE_SIZE"] + 65536,
+    )
+    thread = threading.Thread(target=servidor.run, daemon=True)
+    try:
+        thread.start()
+        endereco = f"http://{host_login}:{porta}"
+        print(f"Sistema disponível em {endereco}", flush=True)
+        print("Mantenha esta janela aberta; Ctrl+C encerra o sistema.", flush=True)
+        if ao_iniciar:
+            _aguardar_http(thread, host_login, porta)
+            ao_iniciar(endereco)
+        while thread.is_alive():
+            time.sleep(0.2)
+    finally:
+        servidor.close()
+        servidor.task_dispatcher.shutdown()
+        if thread.ident is not None:
+            thread.join(timeout=3)

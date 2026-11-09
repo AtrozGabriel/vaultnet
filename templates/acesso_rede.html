@@ -1,0 +1,18 @@
+{% if mensagem %}<div class="notice notice-green" role="status">{{ mensagem }}</div>{% endif %}
+<section class="card"><div class="card-heading"><h2>Quem pode acessar o sistema</h2></div><form class="card-body form-stack" method="post">{{ csrf() }}
+<p class="small muted">Seu acesso atual: {{ 'domínio / túnel' if canal_atual == 'tunel' else 'conexão direta' }} · {{ ip_atual }}.</p>
+<div class="field"><label for="modo">Modo de acesso</label><select id="modo" name="modo">
+<option value="internet" {{ 'selected' if politica.modo == 'internet' else '' }}>Rede local e internet</option>
+<option value="local" {{ 'selected' if politica.modo == 'local' else '' }}>Somente rede da empresa (local e domínio)</option>
+<option value="computador" {{ 'selected' if politica.modo == 'computador' else '' }}>Somente neste computador</option></select></div>
+<div class="field"><label for="redes">Sub-redes locais autorizadas</label><textarea id="redes" name="redes" rows="5" maxlength="4096">{{ politica.redes|join('\n') }}</textarea><small>Uma por linha, como 192.168.1.0/24. As faixas iniciais abrangem redes privadas, inclusive VPNs. Para limitar à rede da empresa, informe as sub-redes dela.</small></div>
+<div class="field"><label for="ips-publicos">IPs públicos autorizados da empresa</label><textarea id="ips-publicos" name="ips_publicos" rows="3" maxlength="4096" placeholder="Um IP público por linha">{{ politica.ips_publicos|default([])|join('\n') }}</textarea><small>Use IPs individuais IPv4 ou IPv6. Para vários dispositivos IPv6, também aceita a faixa pública /64 da empresa, se confirmada pelo provedor. No modo restrito, somente os endereços autorizados entram pelo domínio.</small></div>
+{% if ip_publico %}<div class="notice notice-blue"><span>IP público desta conexão: <strong>{{ ip_publico }}</strong>. Use o botão abaixo somente se estiver conectado à internet da empresa.</span></div>
+<button type="button" class="button button-secondary" data-authorize-ip="{{ ip_publico }}">Autorizar IP desta conexão</button>
+<p class="small muted" data-authorize-status role="status"></p>
+{% else %}<p class="small muted">Para detectar o IP público: permita temporariamente “Rede local e internet”, acesse este painel pelo domínio usando a internet da empresa e clique em “Autorizar IP desta conexão”. Depois selecione o modo restrito e aplique. Também pode preencher o IP manualmente pelo acesso local.</p>{% endif %}
+<div class="notice notice-amber"><span>No modo “Somente rede da empresa”, o domínio funciona apenas para os IPs públicos autorizados; os demais ficam bloqueados. O acesso direto continua em <strong>http://IP_DO_SERVIDOR:8081/login</strong>. Se estiver fora da empresa ao salvar, você poderá perder o acesso. IP público dinâmico precisa ser atualizado quando mudar.</span></div>
+<div class="field"><label for="senha-rede">Sua senha atual</label><input id="senha-rede" name="senha_atual" type="password" autocomplete="current-password" maxlength="128" required></div>
+<button class="button" type="submit">Aplicar configuração</button>
+<p class="small muted">A configuração vale imediatamente e permanece após reiniciar. O servidor local continua acessível no próprio computador. Para recuperar o painel, execute RECUPERAR_ACESSO.bat no servidor. O login continua com segundo fator. Para aplicar esta configuração, basta informar sua senha atual.</p>
+</form></section>

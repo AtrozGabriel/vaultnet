@@ -1,0 +1,51 @@
+{% if not confirmacao_recente %}<div class="notice notice-amber">{{ icon("lock") }}<span>Para criar ou alterar contas, <a href="{{ url_for('confirmar_acesso') }}">confirme novamente sua senha e o segundo fator</a>.</span></div>{% endif %}
+<div class="button-row"><button class="button" type="button" data-toggle-panel="criar-usuario" aria-expanded="false" aria-controls="criar-usuario">Criar novo usuário</button></div>
+<div class="admin-layout">
+    <section class="card"><div class="card-heading"><h2>Contas cadastradas</h2><span class="badge">{{ usuarios|length }} contas</span></div><div class="table-scroll"><table><thead><tr><th>Usuário</th><th>Perfil</th><th>Setor</th><th>Conta</th><th>Segundo fator</th><th>Ações</th></tr></thead><tbody>{% for conta in usuarios %}<tr><td><span class="person-name"><span class="avatar avatar-small">{{ conta.nome[:2]|upper }}</span>{{ conta.nome }}</span></td><td><span class="badge {{ 'badge-blue' if conta.perfil == 'administrador' else '' }}">{{ conta.perfil|capitalize }}</span></td><td>{{ conta.setor or 'Não informado' }}</td><td><span class="badge {{ 'badge-green' if conta.ativo else 'badge-amber' }}">{{ 'Ativa' if conta.ativo else 'Desativada' }}</span></td><td class="small">{{ 'Configurado' if conta.mfa else 'Aguardando configuração' }}</td><td><details><summary>Gerenciar</summary><form method="post"
+      action="{{ url_for('atualizar_usuario', uid=conta.id) }}"
+      class="form-stack account-edit">{{ csrf() }}<div class="field"><label for="perfil-{{ conta.id }}">Perfil</label><select id="perfil-{{ conta.id }}" name="perfil">{% for perfil in perfis %}<option value="{{ perfil }}"
+        {{ 'selected' if perfil == conta.perfil else '' }}>{{ perfil|capitalize }}</option>{% endfor %}</select></div><div class="field"><label for="setor-{{ conta.id }}">Setor</label><input id="setor-{{ conta.id }}" name="setor" value="{{ conta.setor }}" maxlength="60" placeholder="Ex.: Financeiro"></div><label class="check-label"><input type="checkbox"
+       name="ativo"
+       value="1"
+       {{ 'checked' if conta.ativo else '' }}>Conta ativa</label><div class="field"><label for="senha-admin-{{ conta.id }}">Sua senha atual</label><input id="senha-admin-{{ conta.id }}"
+       type="password"
+       name="senha_atual"
+       autocomplete="current-password"
+       maxlength="128"
+       required></div><button class="button button-small"
+        type="submit"
+        {{ 'disabled' if not confirmacao_recente else '' }}>Salvar conta</button><p class="small muted">As sessões dessa conta serão encerradas.</p></form></details></td></tr>{% endfor %}</tbody></table></div></section>
+    <section class="card fit-content" id="criar-usuario" hidden><div class="card-heading"><h2>Novo usuário</h2>{{ icon("users") }}</div><form method="post"
+      action="{{ url_for('novo_usuario') }}"
+      class="card-body form-stack">{{ csrf() }}<div class="field"><label for="novo-nome">Nome de usuário</label><input id="novo-nome"
+       name="nome"
+       minlength="3"
+       maxlength="20"
+       pattern="[\p{L}\p{Nd} ]{3,20}"
+       placeholder="ex.: novo.usuario"
+       required><small class="muted">Até 20 caracteres: letras maiúsculas, minúsculas, números e espaços. Sem símbolos.</small></div><div class="field"><label for="novo-perfil">Perfil</label><select id="novo-perfil" name="perfil">{% for perfil in perfis %}<option value="{{ perfil }}">{{ perfil|capitalize }}</option>{% endfor %}</select></div><div class="field"><label for="novo-setor">Setor</label><input id="novo-setor" name="setor" maxlength="60" placeholder="Ex.: Financeiro"></div><div class="field"><label for="nova-senha-usuario">Senha inicial</label><input id="nova-senha-usuario"
+       name="senha"
+       type="password"
+       autocomplete="new-password"
+       minlength="9"
+       maxlength="128"
+       required></div><div class="field"><label for="senha-atual-admin">Sua senha atual</label><input id="senha-atual-admin"
+       name="senha_atual"
+       type="password"
+       autocomplete="current-password"
+       maxlength="128"
+       required></div><button class="button full"
+        type="submit"
+        {{ 'disabled' if not confirmacao_recente else '' }}>Criar usuário</button><p class="small muted">Acompanhe o primeiro acesso do titular para cadastrar o autenticador.</p></form></section>
+</div>
+
+<section class="card">
+    <div class="card-heading"><h2>Solicitações de alteração de nome</h2><span class="badge">{{ total_pedidos }} pendente(s)</span></div>
+    {% if request.args.get('nome') in ['aprovada','rejeitada'] %}<p class="card-body" role="status">Solicitação {{ request.args.get('nome') }}.</p>{% endif %}
+    {% if pedidos_nome %}<div class="table-scroll"><table><thead><tr><th>Usuário atual</th><th>Nome solicitado</th><th>Solicitado em</th><th>Decisão</th></tr></thead><tbody>
+    {% for pedido in pedidos_nome %}<tr><td>{{ pedido.usuario_atual }}</td><td>{{ pedido.nome_novo }}</td><td>{{ pedido.criado|horario }}</td><td><div class="button-row">
+        <form method="post" action="{{ url_for('decidir_nome', pedido_id=pedido.id, decisao='aprovar') }}">{{ csrf() }}<button type="submit" class="button button-small" {{ 'disabled' if not confirmacao_recente or not pedido.ativo else '' }}>Aprovar</button></form>
+        <form method="post" action="{{ url_for('decidir_nome', pedido_id=pedido.id, decisao='rejeitar') }}">{{ csrf() }}<button type="submit" class="button button-secondary button-small" {{ 'disabled' if not confirmacao_recente else '' }}>Rejeitar</button></form>
+    </div></td></tr>{% endfor %}</tbody></table></div>{% if total_pedidos > 100 %}<p class="card-body small muted">Mostrando as 100 solicitações mais antigas. Ao decidir, as próximas aparecem.</p>{% endif %}
+    {% else %}<p class="card-body muted">Nenhuma solicitação pendente.</p>{% endif %}
+</section>

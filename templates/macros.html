@@ -1,0 +1,31 @@
+{% macro icon(nome) -%}
+    <svg class="icon" viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+        <use href="{{ url_for('static', filename='icons.svg') }}#{{ nome }}"></use>
+    </svg>
+{%- endmacro %}
+{% macro csrf() -%}
+    <input type="hidden" name="csrf" value="{{ sessao.csrf }}">
+{%- endmacro %}
+{% macro navegacao_paginas(dados) -%}
+    {% if dados.total %}
+        <nav class="pagination" aria-label="Paginação">
+            <span class="small muted">{{ dados.inicio }}–{{ dados.fim }} de {{ dados.total }} · Página {{ dados.pagina }} de {{ dados.paginas }}</span>
+            <div class="button-row">
+                {% if dados.anterior %}<a class="button button-secondary button-small" href="{{ dados.anterior }}" rel="prev">Anterior</a>{% endif %}
+                {% if dados.proxima %}<a class="button button-secondary button-small" href="{{ dados.proxima }}" rel="next">Próxima</a>{% endif %}
+            </div>
+        </nav>
+    {% endif %}
+{%- endmacro %}
+{% macro nav(endpoint,icone,rotulo,ativo) -%}<a class="nav-item {{ 'active' if ativo else '' }}"
+   href="{{ url_for(endpoint) }}"
+   {% if ativo %}aria-current="page"{% endif %}>{{ icon(icone) }}<span>{{ rotulo }}</span></a>{%- endmacro %}
+{% macro vazio(titulo,descricao,icone='files') -%}<div class="empty-state"><div class="empty-icon">{{ icon(icone) }}</div><h3>{{ titulo }}</h3><p>{{ descricao }}</p></div>{%- endmacro %}
+{% macro status(arquivo) -%}<span class="badge {{ 'badge-green' if arquivo.scanner in ['clamav','defender'] else 'badge-amber' }}"><span class="status-dot"></span>{{ 'Verificado pelo antivírus' if arquivo.scanner in ['clamav','defender'] else 'Demonstração · sem antivírus' }}</span>{%- endmacro %}
+{% macro file_name(arquivo) -%}<div class="file-name"><span class="file-type type-{{ arquivo.extensao }}">{{ icon("files") }}</span><div><a href="{{ url_for('arquivos.detalhe', file_id=arquivo.id) }}">{{ arquivo.nome }}</a><small>{{ arquivo.categoria }} · {{ arquivo|acesso_nome }}</small></div></div>{%- endmacro %}
+{% macro tabela_arquivos(arquivos) -%}
+    {% if arquivos %}<div class="table-scroll"><table><thead><tr><th>Arquivo</th><th>Enviado por</th><th>Data</th><th>Tamanho</th><th>Status</th><th><span class="sr-only">Ações</span></th></tr></thead><tbody>{% for arquivo in arquivos %}<tr><td>{{ file_name(arquivo) }}</td><td><span class="person-name"><span class="avatar avatar-small">{{ arquivo.dono[:2]|upper }}</span>{{ arquivo.dono }}</span></td><td class="muted nowrap">{{ arquivo.criado|horario }}</td><td class="muted nowrap">{{ arquivo.tamanho|tamanho }}</td><td>{{ status(arquivo) }}</td><td><a class="icon-button"
+   href="{{ url_for('arquivos.baixar', file_id=arquivo.id) }}"
+   title="Baixar {{ arquivo.nome }}"
+   aria-label="Baixar {{ arquivo.nome }}">{{ icon("download") }}</a></td></tr>{% endfor %}</tbody></table></div>{% else %}{{ vazio('Tudo pronto para começar', 'Os documentos enviados aparecerão aqui.') }}{% endif %}
+{%- endmacro %}

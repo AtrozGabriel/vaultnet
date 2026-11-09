@@ -1,0 +1,10 @@
+ATUALIZAÇÃO — ORGANIZAÇÃO DOS ARQUIVOS
+Extraia na raiz do projeto e substitua arquivos.py e os dois arquivos em templates.
+Teste primeiro no Windows com INICIAR_LOCAL.bat. Feche o servidor antes de substituir e abra novamente.
+Meus arquivos: somente documentos enviados pela conta atual.
+Compartilhados comigo: documentos de outras pessoas destinados à conta, ao setor, ao perfil ou à equipe. Inclui filtros separados para cada público.
+Todos os arquivos: nova opção da administração, exclusiva para administradores.
+Nome do remetente e público continuam indicados nas linhas e nos detalhes.
+Não modifica dados, chaves, regras de rede nem estrutura do banco.
+Para atualizar a VM: pare vaultnet, faça backup da pasta atual com dados, substitua somente os arquivos deste ZIP e inicie vaultnet novamente. Não envie dados_local ou o banco do Windows à VM.
+Validação: sintaxe Python e consultas SQLite com cenários de remetente, usuário específico, setor, perfil, equipe e administrador. Execução visual no Windows/VM precisa ser confirmada.

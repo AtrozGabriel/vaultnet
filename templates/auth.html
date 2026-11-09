@@ -1,0 +1,129 @@
+<div class="auth-step"><span class="{{ 'current' if tipo == 'login' else 'completed' }}">1</span><span class="step-line"></span><span class="{{ 'current' if tipo != 'login' else '' }}">2</span><span>{{ 'Identificação' if tipo == 'login' else 'Verificação de segurança' }}</span></div>
+{% if tipo == "login" %}
+    <h1>Entrar na sua conta</h1>
+    <p class="subtitle">Digite o nome de usuário escolhido no cadastro e sua senha.</p>
+    <div class="notice notice-blue">
+        {{ icon("network") }}<span><strong>Origem autorizada.</strong>
+        <br>
+        A conexão passou pela verificação do servidor.</span>
+    </div>
+    {% if erro %}<div class="notice notice-red" role="alert">{{ icon("info") }}<span>{{ erro }}</span></div>{% endif %}
+    <form method="post" class="form-stack">
+        {{ csrf() }}
+        <div class="field">
+            <label for="nome">Nome de usuário</label><input id="nome"
+       name="nome"
+       autocomplete="username"
+       maxlength="40"
+       placeholder="Seu nome de usuário"
+       required
+       autofocus>
+        </div>
+        <div class="field">
+            <label for="senha">Senha</label>
+            <div class="password-input">
+                <input id="senha"
+                       name="senha"
+                       type="password"
+                       autocomplete="current-password"
+                       maxlength="128"
+                       placeholder="Sua senha"
+                       required><button type="button"
+        data-password="senha"
+        aria-label="Mostrar senha"
+        aria-pressed="false">{{ icon("eye") }}</button>
+            </div>
+        </div>
+        <button class="button full" type="submit">Continuar {{ icon("chevron_right") }}</button>
+    </form>
+    <details class="access-help">
+        <summary>Esqueceu sua senha?</summary>
+        <p>Solicite a recuperação ao responsável pela rede. A identidade do titular precisa ser confirmada antes da alteração.</p>
+    </details>
+    <div class="auth-bottom">{{ icon("lock") }}<span>O acesso será liberado após confirmar o segundo fator.</span></div>
+{% elif tipo in ["segundo_fator","configuracao"] %}
+    <span class="auth-emblem">{{ icon("shield") }}</span>
+    <h1>{{ 'Configure seu autenticador' if tipo == 'configuracao' else 'Confirme seu acesso' }}</h1>
+    <p class="subtitle">{{ 'Adicione sua conta ao aplicativo autenticador e confirme o primeiro código.' if tipo == 'configuracao' else 'Digite o código do aplicativo autenticador para concluir o login.' }}</p>
+    {% if erro %}<div class="notice notice-red" role="alert">{{ icon("info") }}<span>{{ erro }}</span></div>{% endif %}
+    {% if tipo == "configuracao" %}
+        <div class="qr-wrap">
+            <img src="{{ url_for('qr_2fa') }}"
+                 alt="QR code para cadastrar a conta VaultNet no autenticador"
+                 width="220"
+                 height="220">
+        </div>
+        <details class="manual-key">
+            <summary>Adicionar usando a chave de configuração</summary>
+            <code>{{ segredo }}</code>
+            <p>Conta: {{ usuario.nome }}. Tipo: baseado em tempo. Guarde a chave como uma senha.</p>
+        </details>
+    {% endif %}
+    <form method="post" class="form-stack">
+        {{ csrf() }}
+        <div class="field">
+            <label for="codigo">{{ 'Código de seis dígitos' if tipo == 'configuracao' else 'Código do autenticador' }}</label><input class="otp-input"
+       id="codigo"
+       name="codigo"
+       inputmode="numeric"
+       pattern="[0-9]{6}"
+       maxlength="6"
+       autocomplete="one-time-code"
+       placeholder="000000"
+       required
+       autofocus>
+        </div>
+        <button class="button full" type="submit">{{ icon("shield") }} Verificar e entrar</button>
+    </form>
+    {% if tipo == "segundo_fator" %}<details class="access-help"><summary>Usar um código de recuperação</summary><form method="post" class="form-stack">{{ csrf() }}<div class="field"><label for="recuperacao">Código de recuperação</label><input id="recuperacao"
+       name="codigo"
+       maxlength="50"
+       autocomplete="one-time-code"
+       placeholder="Seu código guardado"
+       required></div><button class="button button-secondary full" type="submit">Usar código de recuperação</button></form></details>{% endif %}
+    <p class="small muted">O aplicativo gera códigos mesmo sem internet. Confira a data e o horário do celular se um código for recusado.</p>
+    <form method="post" action="{{ url_for('sair') }}" class="cancel-form">
+        {{ csrf() }}<button class="text-button" type="submit">{{ icon("arrow_back") }} Cancelar acesso</button>
+    </form>
+{% elif tipo == "recuperacao" %}
+    <span class="auth-emblem success">{{ icon("check") }}</span>
+    <h1>Conta protegida</h1>
+    <p class="subtitle">Guarde os códigos de recuperação em um local seguro, separado do celular. Cada código funciona uma vez e sua senha continua sendo exigida.</p>
+    <div class="recovery-grid">{% for codigo in codigos %}<code>{{ codigo }}</code>{% endfor %}</div>
+    <div class="notice notice-amber">{{ icon("info") }}<span>Esta página fica disponível por até cinco minutos. Ao confirmar, os códigos deixam de ser exibidos.</span></div>
+    <form method="post" action="{{ url_for('confirmar_codigos') }}">
+        {{ csrf() }}<button class="button full"
+        type="submit">Já guardei meus códigos {{ icon("chevron_right") }}</button>
+    </form>
+{% elif tipo == "reautenticacao" %}
+    <span class="auth-emblem">{{ icon("lock") }}</span>
+    <h1>Confirmar acesso</h1>
+    <p class="subtitle">Confirme sua senha e um novo código do autenticador para realizar operações sensíveis.</p>
+    {% if erro %}<div class="notice notice-red" role="alert">{{ icon("info") }}<span>{{ erro }}</span></div>{% endif %}
+    <form method="post" class="form-stack">
+        {{ csrf() }}
+        <div class="field">
+            <label for="senha">Senha atual</label><input id="senha"
+       name="senha"
+       type="password"
+       maxlength="128"
+       autocomplete="current-password"
+       required
+       autofocus>
+        </div>
+        <div class="field">
+            <label for="codigo">Código do autenticador</label><input id="codigo"
+       name="codigo"
+       class="otp-input"
+       inputmode="numeric"
+       pattern="[0-9]{6}"
+       maxlength="6"
+       autocomplete="one-time-code"
+       placeholder="000000"
+       required>
+        </div>
+        <button class="button full" type="submit">Confirmar acesso</button>
+    </form>
+    <p class="small muted">Use um código ainda não utilizado. A confirmação vale por cinco minutos.</p>
+    <a class="text-button" href="{{ url_for('perfil') }}">{{ icon("arrow_back") }} Voltar ao perfil</a>
+{% endif %}

@@ -1,0 +1,36 @@
+{% set selecionado = arquivo|acesso_valor if arquivo is defined else 'equipe' %}
+<div class="field">
+<label for="visibilidade">Quem pode acessar</label>
+<select name="visibilidade" id="visibilidade" required>
+<option value="privado" {{ 'selected' if selecionado == 'privado' else '' }}>Somente eu e os administradores</option>
+<option value="equipe" {{ 'selected' if selecionado == 'equipe' else '' }}>Toda a equipe</option>
+<optgroup label="Por nível de usuário">
+{% for perfil in perfis %}<option value="perfil:{{ perfil }}" {{ 'selected' if selecionado == 'perfil:' ~ perfil else '' }}>{{ perfil|capitalize }}</option>{% endfor %}
+</optgroup>
+{% if setores %}<optgroup label="Por setor">{% for setor in setores %}<option value="setor:{{ setor }}" {{ 'selected' if selecionado == 'setor:' ~ setor else '' }}>{{ setor }}</option>{% endfor %}</optgroup>{% endif %}
+<option value="usuario" {{ 'selected' if selecionado.startswith('usuario:') else '' }}>Escolher usuário específico…</option>
+{% if selecionado.startswith('setor:') and selecionado[6:] not in setores %}<option value="{{ selecionado }}" selected>{{ selecionado[6:] }} (sem usuários ativos)</option>{% endif %}
+</select>
+<section class="recipient-picker" data-recipient-picker hidden aria-label="Escolher usuário específico">
+    <label for="buscar-destinatario">Digite o nome do usuário</label>
+    <input id="buscar-destinatario" type="search" data-recipient-search
+           placeholder="Buscar por nome…" autocomplete="off" maxlength="80"
+           aria-controls="lista-destinatarios" disabled>
+    <p class="small muted" data-recipient-status role="status" aria-live="polite"></p>
+    <div id="lista-destinatarios" class="recipient-list" role="group" aria-label="Usuários disponíveis">
+    {% for pessoa in destinatarios %}
+        <label class="recipient-option" data-recipient-option data-recipient-name="{{ pessoa.nome }}">
+            <input type="radio" name="destinatario_id" value="{{ pessoa.id }}"
+                   {{ 'checked' if selecionado == 'usuario:' ~ pessoa.id else '' }} disabled>
+            <span><strong>{{ pessoa.nome }}</strong><small>{{ pessoa.perfil|capitalize }}{{ ' · ' ~ pessoa.setor if pessoa.setor else '' }}</small></span>
+        </label>
+    {% endfor %}
+    </div>
+    <p class="small" data-recipient-selected></p>
+    {% if selecionado.startswith('usuario:') and selecionado[8:]|int not in destinatarios|map(attribute='id')|list %}
+    <p class="small muted">O destinatário anterior está desativado. Escolha uma conta ativa.</p>
+    {% endif %}
+</section>
+<noscript><p>Ative o JavaScript para buscar e escolher um usuário específico.</p></noscript>
+<p class="small muted">O remetente e os administradores mantêm acesso. Para níveis e setores, o acesso acompanha o cadastro atual dos usuários.</p>
+</div>

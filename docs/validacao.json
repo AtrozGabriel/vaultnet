@@ -1,0 +1,572 @@
+{
+  "edicao": "VaultNet HTTP",
+  "data_utc": "2026-10-13T12:01:10.037079+00:00",
+  "escopo": "Validação do código e dos arquivos desta edição, sem alegar ausência de todas as vulnerabilidades.",
+  "pesquisa_antes_das_alteracoes": {
+    "resultado": "Concluída antes de modificar os fontes",
+    "fontes": [
+      "https://cheatsheetseries.owasp.org/cheatsheets/Transport_Layer_Security_Cheat_Sheet.html",
+      "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Set-Cookie",
+      "https://developer.mozilla.org/en-US/docs/Web/API/Clipboard/writeText",
+      "https://developer.mozilla.org/en-US/docs/Web/HTTP/Reference/Headers/Strict-Transport-Security",
+      "https://datatracker.ietf.org/doc/html/rfc6797",
+      "https://www.w3.org/TR/secure-contexts/",
+      "https://docs.pylonsproject.org/projects/waitress/en/stable/arguments.html"
+    ],
+    "viabilidade": "HTTP funcional para laboratório com dados fictícios. Não é adequado para credenciais ou documentos reais na internet porque o transporte não tem criptografia."
+  },
+  "transporte": {
+    "servidor": "Waitress 3.0.2 direto",
+    "protocolo": "http",
+    "url_padrao": "http://127.0.0.1:8080/login",
+    "escuta_padrao": "127.0.0.1",
+    "lan": "Apenas com --rede-local e --subrede explícitos; Host validado; /0 recusado",
+    "proxy_confiavel": null,
+    "cabecalhos_proxy_forjados_removidos": "Comprovado em teste com Waitress real",
+    "cookie": {
+      "nome": "vaultnet_http",
+      "secure": false,
+      "httponly": true,
+      "samesite": "Lax",
+      "path": "/"
+    },
+    "hsts_enviado": false,
+    "caddy_e_certificados": "Removidos da edição HTTP",
+    "limitacao": "Senha, códigos 2FA, cookies e arquivos transitam sem criptografia. 2FA e criptografia no disco não eliminam esse risco."
+  },
+  "suites": [
+    {
+      "python": "3.12",
+      "plataforma": "Linux x64",
+      "testes": 156,
+      "duracao_segundos": 55.591,
+      "resultado": "OK",
+      "por_modulo": {
+        "antivirus": 11,
+        "auth": 30,
+        "console": 17,
+        "http": 12,
+        "inicializacao": 23,
+        "integracao": 54,
+        "revisao": 9
+      }
+    },
+    {
+      "python": "3.14",
+      "plataforma": "Linux x64",
+      "testes": 156,
+      "duracao_segundos": 55.559,
+      "resultado": "OK",
+      "por_modulo": {
+        "antivirus": 11,
+        "auth": 30,
+        "console": 17,
+        "http": 12,
+        "inicializacao": 23,
+        "integracao": 54,
+        "revisao": 9
+      }
+    }
+  ],
+  "arquivos_revisados": {
+    "python": {
+      "arquivos": 14,
+      "sintaxe": "OK"
+    },
+    "templates": {
+      "arquivos": 9,
+      "compilacao": "OK",
+      "endpoints_estaticos": 21,
+      "icones_estaticos": 19
+    },
+    "recursos": {
+      "svg": "OK",
+      "css_urls_locais": 5,
+      "fontes_woff2": 5,
+      "licencas_fontes": 2
+    },
+    "documentacao": {
+      "markdown": 1,
+      "links_locais": "OK"
+    },
+    "wheels": {
+      "arquivos": 62,
+      "ambientes": {
+        "linux-py312-x64": {
+          "dependencies": 15,
+          "sha256": "OK",
+          "zip_crc": "OK",
+          "wheel_tags": "OK",
+          "requires_python": "OK",
+          "metadata_dependency_closure": "OK"
+        },
+        "linux-py314-x64": {
+          "dependencies": 15,
+          "sha256": "OK",
+          "zip_crc": "OK",
+          "wheel_tags": "OK",
+          "requires_python": "OK",
+          "metadata_dependency_closure": "OK"
+        },
+        "windows-py312-x64": {
+          "dependencies": 16,
+          "sha256": "OK",
+          "zip_crc": "OK",
+          "wheel_tags": "OK",
+          "requires_python": "OK",
+          "metadata_dependency_closure": "OK"
+        },
+        "windows-py314-x64": {
+          "dependencies": 16,
+          "sha256": "OK",
+          "zip_crc": "OK",
+          "wheel_tags": "OK",
+          "requires_python": "OK",
+          "metadata_dependency_closure": "OK"
+        }
+      }
+    },
+    "requirements": {
+      "entradas_lock": 16,
+      "txt_referencia_lock": true
+    },
+    "configuracao": {
+      "gitignore_dados_e_ambiente": "OK",
+      "http_direto": "Waitress",
+      "certificado_e_caddy": "Removidos desta edição"
+    }
+  },
+  "inicializacao": {
+    "bat": "INICIAR.bat",
+    "auxiliar": "iniciar_windows.py",
+    "destino": "http://127.0.0.1:8080/login",
+    "verifica_antes_de_instalar": true,
+    "instala_apenas_ausentes_ou_incompativeis": true,
+    "registro_nao_substitui_inspecao": true,
+    "instalacao_dependencias": "Offline, com hashes e sem dependências automáticas",
+    "ensurepip": "Somente quando pip está ausente",
+    "python_ausente": "WinGet tenta instalar Python 3.14.8 x64 para o usuário atual; precisa de internet. Ramo nativo ainda pendente.",
+    "credenciais_em_argumentos": false,
+    "nao_instala_ou_remove_certificados": true,
+    "preparo_incremental": [
+      {
+        "python": "/workspace/scratch/74feafed2adc/qa_offline_venv/bin/python",
+        "preparacao_limpa": true,
+        "sem_registro_nao_reinstala_pacotes_presentes": true,
+        "reposicao_apenas_pyotp_ausente": true,
+        "flask_nao_regravado": true,
+        "dados_preservados": true,
+        "pip_check": "OK",
+        "plataforma": "Linux x64"
+      },
+      {
+        "python": "/workspace/scratch/74feafed2adc/qa_offline_venv314/bin/python",
+        "preparacao_limpa": true,
+        "sem_registro_nao_reinstala_pacotes_presentes": true,
+        "reposicao_apenas_pyotp_ausente": true,
+        "flask_nao_regravado": true,
+        "dados_preservados": true,
+        "pip_check": "OK",
+        "plataforma": "Linux x64"
+      }
+    ],
+    "bat_e_documentacao": {
+      "bat": "INICIAR.bat",
+      "CRLF": true,
+      "labels_e_referencias": "OK",
+      "certificado_caddy_e_bat_de_remocao_ausentes": true,
+      "apenas_readme_markdown": true,
+      "md_originais_preservados_byte_a_byte": 9,
+      "zip_https_original_inalterado": true,
+      "lock_e_62_wheels_inalterados": true,
+      "execucao_cmd_windows": "Pendente"
+    },
+    "pergunta_administrador": {
+      "quando": "Uma vez na etapa --executar de cada abertura do BAT; não aparece em --preparar.",
+      "pergunta": "Deseja criar outra conta de administrador? (y/n):",
+      "banco_sem_administrador": "A pergunta usa uma conta em vez de outra conta.",
+      "y": "Solicita nome, senha e confirmação; cria conta adicional de administrador com 2FA a configurar no primeiro login.",
+      "n": "Inicia o servidor e abre o login sem cadastrar, inclusive se o banco estiver vazio.",
+      "validacao": "Aceita Y/N e espaços externos; outras respostas repetem a pergunta. Nome inválido ou em uso e senha divergente ou fora de 9–128 caracteres podem ser corrigidos. Nenhuma conta existente é substituída.",
+      "cancelamento": "Ctrl+C ou EOF encerra a operação sem gravar conta parcial.",
+      "limite_de_acesso": "Operação local do terminal do servidor. A criação pelo site permanece protegida pela permissão administrar.",
+      "pty_real": [
+        {
+          "runtime": "qa_offline_venv",
+          "plataforma": "PTY Linux e Waitress reais; não executa BAT nativo Windows",
+          "etapas": [
+            {
+              "escolha": "y",
+              "contas": 1,
+              "login_disponivel": true,
+              "conta_anterior_preservada": true,
+              "senha_sem_texto_puro": true,
+              "senha_mascarada": true,
+              "2fa_exigido_para_novo_admin": true
+            },
+            {
+              "escolha": "y",
+              "contas": 2,
+              "login_disponivel": true,
+              "conta_anterior_preservada": true,
+              "senha_sem_texto_puro": true,
+              "senha_mascarada": true,
+              "2fa_exigido_para_novo_admin": true
+            },
+            {
+              "escolha": "n",
+              "contas": 2,
+              "login_disponivel": true,
+              "conta_anterior_preservada": true,
+              "senha_sem_texto_puro": true,
+              "senha_mascarada": false,
+              "2fa_exigido_para_novo_admin": false
+            }
+          ],
+          "chaves_preservadas": true,
+          "portas_fechadas_apos_ctrl_c": true
+        },
+        {
+          "runtime": "qa_offline_venv314",
+          "plataforma": "PTY Linux e Waitress reais; não executa BAT nativo Windows",
+          "etapas": [
+            {
+              "escolha": "y",
+              "contas": 1,
+              "login_disponivel": true,
+              "conta_anterior_preservada": true,
+              "senha_sem_texto_puro": true,
+              "senha_mascarada": true,
+              "2fa_exigido_para_novo_admin": true
+            },
+            {
+              "escolha": "y",
+              "contas": 2,
+              "login_disponivel": true,
+              "conta_anterior_preservada": true,
+              "senha_sem_texto_puro": true,
+              "senha_mascarada": true,
+              "2fa_exigido_para_novo_admin": true
+            },
+            {
+              "escolha": "n",
+              "contas": 2,
+              "login_disponivel": true,
+              "conta_anterior_preservada": true,
+              "senha_sem_texto_puro": true,
+              "senha_mascarada": false,
+              "2fa_exigido_para_novo_admin": false
+            }
+          ],
+          "chaves_preservadas": true,
+          "portas_fechadas_apos_ctrl_c": true
+        }
+      ],
+      "cmd_windows": "Ainda pendente de confirmação nativa; execução por PTY Linux cobre entrada real e Waitress real."
+    }
+  },
+  "migracao": {
+    "origem": "Instalação de teste gerada pelo código HTTPS da versão anterior",
+    "destino": "Código HTTP atual",
+    "contas_senhas_perfis_e_2fa_preservados": true,
+    "recuperacao_preservada": true,
+    "documento_e_chaves_identicos": true,
+    "sessoes_anteriores_revogadas": true,
+    "login_senha_e_totp_http": true,
+    "download_http_identico": true,
+    "scanner": "Aprovação simulada para produzir documento aprovado; antivírus nativo não executado"
+  },
+  "uploads": {
+    "limite_arquivo_bytes": 10485760,
+    "memoria_multipart_bytes": 131072,
+    "partes_maximas": 12,
+    "tamanhos_testados_no_navegador": [
+      33587,
+      223232,
+      1048576,
+      5242880,
+      10485760,
+      240093
+    ],
+    "downloads_identicos_byte_a_byte": true,
+    "um_byte_acima_e_formularios_excessivos": "Bloqueados nos testes de integração",
+    "antivirus_nos_testes": "Aprovação simulada. Não substitui execução real do Defender ou ClamAV."
+  },
+  "analise_estatica": {
+    "ruff": "OK",
+    "bandit_medio_ou_alto_reportados": 0,
+    "bandit_baixo_total": 10,
+    "alertas_baixos_revisados": [
+      {
+        "arquivo": "antivirus.py",
+        "linha": 8,
+        "id": "B404",
+        "motivo": "Subprocessos para Python/pip ou antivírus, argumentos separados e shell=False."
+      },
+      {
+        "arquivo": "antivirus.py",
+        "linha": 120,
+        "id": "B603",
+        "motivo": "Subprocessos para Python/pip ou antivírus, argumentos separados e shell=False."
+      },
+      {
+        "arquivo": "antivirus.py",
+        "linha": 190,
+        "id": "B603",
+        "motivo": "Subprocessos para Python/pip ou antivírus, argumentos separados e shell=False."
+      },
+      {
+        "arquivo": "iniciar_windows.py",
+        "linha": 11,
+        "id": "B404",
+        "motivo": "Subprocessos para Python/pip ou antivírus, argumentos separados e shell=False."
+      },
+      {
+        "arquivo": "iniciar_windows.py",
+        "linha": 78,
+        "id": "B603",
+        "motivo": "Subprocessos para Python/pip ou antivírus, argumentos separados e shell=False."
+      },
+      {
+        "arquivo": "iniciar_windows.py",
+        "linha": 136,
+        "id": "B603",
+        "motivo": "Subprocessos para Python/pip ou antivírus, argumentos separados e shell=False."
+      },
+      {
+        "arquivo": "iniciar_windows.py",
+        "linha": 174,
+        "id": "B603",
+        "motivo": "Subprocessos para Python/pip ou antivírus, argumentos separados e shell=False."
+      },
+      {
+        "arquivo": "iniciar_windows.py",
+        "linha": 196,
+        "id": "B603",
+        "motivo": "Subprocessos para Python/pip ou antivírus, argumentos separados e shell=False."
+      },
+      {
+        "arquivo": "iniciar_windows.py",
+        "linha": 232,
+        "id": "B603",
+        "motivo": "Subprocessos para Python/pip ou antivírus, argumentos separados e shell=False."
+      },
+      {
+        "arquivo": "iniciar_windows.py",
+        "linha": 241,
+        "id": "B603",
+        "motivo": "Subprocessos para Python/pip ou antivírus, argumentos separados e shell=False."
+      }
+    ],
+    "supressoes_revisadas": [
+      "B104 em manage.py: escuta 0.0.0.0 necessária apenas para LAN explicitamente solicitada, com controle por IP e Host; não significa proteção de transporte.",
+      "B104 em antivirus.py: comparação com versão de assinatura 0.0.0.0, não escuta de rede.",
+      "B608 em arquivos.py: fragmentos SQL constantes, dados de usuários fornecidos como parâmetros; regressões de privacidade e injeção."
+    ]
+  },
+  "dependencias": {
+    "versoes": {
+      "argon2-cffi": "25.1.0",
+      "argon2-cffi-bindings": "26.1.0",
+      "blinker": "1.9.0",
+      "cffi": "2.1.1",
+      "click": "8.5.0",
+      "colorama": "0.4.6",
+      "cryptography": "50.0.2",
+      "flask": "3.1.3",
+      "itsdangerous": "2.2.0",
+      "jinja2": "3.1.6",
+      "markupsafe": "3.0.4",
+      "pycparser": "3.11",
+      "pyotp": "2.10.0",
+      "qrcode": "8.2",
+      "waitress": "3.0.2",
+      "werkzeug": "3.1.9"
+    },
+    "entradas_lock": 16,
+    "wheels": 62,
+    "requirements_lock_sha256": "5d299490b79bd718101b8f0b4c3b4f8c0177f819e0c9ed9c5e422147df7e530e",
+    "lock_e_wheels_iguais_a_edicao_anterior": true,
+    "verificacoes": "Hashes, CRC, tags, Requires-Python e fechamento de dependências conferidos. A auditoria histórica de vulnerabilidades está no arquivo separado da edição anterior; não foi apresentada como nova auditoria online."
+  },
+  "documentacao": {
+    "markdown_no_projeto": [
+      "README.md"
+    ],
+    "md_anteriores_arquivados_sem_alteracao": 9,
+    "arquivo_de_apoio": "documentacao_vaultnet_arquivada.zip",
+    "zip_https_original_preservado": true,
+    "sha256_zip_https_original": "27a2142519e6e2d4634a21ea21bbc0d3aa2ae22f0b55a7c3dee2babe79926e01"
+  },
+  "pendente_no_ambiente_real": [
+    "Executar INICIAR.bat no CMD/Windows, incluindo detecção de Python, ausência de Python/WinGet, cancelamento e caminhos com espaços.",
+    "Executar Defender ou ClamAV real: estado, assinaturas, permissões e upload aprovado/bloqueado.",
+    "Acessar a partir de outro computador Windows com a subrede e o firewall configurados; confirmar recusa de origens externas.",
+    "Validar operação desconectada após preparo, mantendo rede local e relógios sincronizados.",
+    "Verificar ACL NTFS e restauração de backup completo de dados.",
+    "Se houver uso contínuo, validar carga e inicialização após reiniciar. Para publicação com dados reais, manter ou recuperar HTTPS e rever a implantação."
+  ],
+  "navegador_validacao_inicial": [
+    {
+      "browser": "153.0.8010.0",
+      "requestsExternal": 0,
+      "jsErrors": 0,
+      "flows": [
+        "login",
+        "enrollment",
+        "recovery",
+        "dashboard",
+        "navigation",
+        "upload",
+        "edit",
+        "download",
+        "trash",
+        "restore",
+        "search",
+        "theme",
+        "mobile-menu",
+        "logout"
+      ],
+      "uploads": [
+        {
+          "name": "documento_33587.docx",
+          "bytes": 33587,
+          "upload": true,
+          "download_identico": true
+        },
+        {
+          "name": "documento_223232.docx",
+          "bytes": 223232,
+          "upload": true,
+          "download_identico": true
+        },
+        {
+          "name": "documento_1048576.docx",
+          "bytes": 1048576,
+          "upload": true,
+          "download_identico": true
+        },
+        {
+          "name": "documento_5242880.docx",
+          "bytes": 5242880,
+          "upload": true,
+          "download_identico": true
+        },
+        {
+          "name": "documento_10485760.docx",
+          "bytes": 10485760,
+          "upload": true,
+          "download_identico": true
+        },
+        {
+          "name": "imagem_218kb.png",
+          "bytes": 240093,
+          "upload": true,
+          "download_identico": true
+        }
+      ],
+      "mobileMenuLabels": "OK",
+      "url": "http://127.0.0.1:8086",
+      "contextoSeguro": true,
+      "clipboardManualNaLan": false,
+      "origemLanSimulada": false,
+      "transporte": "HTTP para Waitress em loopback; na origem LAN simulada, adaptador de requisições preserva Host",
+      "cookieHttpOnly": true,
+      "cookieSemSecure": true,
+      "scanner": "Aprovação simulada; HTTP e navegador reais"
+    },
+    {
+      "browser": "153.0.8010.0",
+      "url": "http://vaultnet.interno:8087",
+      "origemLanSimulada": true,
+      "contextoSeguro": false,
+      "clipboardManualNaLan": true,
+      "linksHttpNaOrigemLan": true,
+      "navegacaoPaginas": 7,
+      "cookieHttpOnly": true,
+      "cookieSemSecure": true,
+      "semHsts": true,
+      "requestsExternal": 0,
+      "jsErrors": 0,
+      "scanner": "Aprovação simulada",
+      "limitacao": "Origem LAN simulada via adaptador HTTP para loopback e sessão de fixture. Login real com 2FA executado em loopback; não substitui teste entre computadores.",
+      "exit_code": 0,
+      "nenhum_certificado_gerado": true,
+      "porta_fechada_apos_ctrl_c": true
+    }
+  ],
+  "navegador": [
+    {
+      "browser": "153.0.8010.0",
+      "requestsExternal": 0,
+      "jsErrors": 0,
+      "flows": [
+        "login",
+        "enrollment",
+        "recovery",
+        "dashboard",
+        "navigation",
+        "upload",
+        "edit",
+        "download",
+        "trash",
+        "restore",
+        "search",
+        "theme",
+        "mobile-menu",
+        "logout",
+        "admin-create-9",
+        "password-change-9",
+        "password-login-9"
+      ],
+      "senhaMinima": 9,
+      "avisosRemovidos": true,
+      "mobileMenuLabels": "OK",
+      "url": "http://127.0.0.1:8088",
+      "contextoSeguro": true,
+      "clipboardManualNaLan": false,
+      "origemLanSimulada": false,
+      "transporte": "HTTP real para Waitress em loopback",
+      "cookieHttpOnly": true,
+      "cookieSemSecure": true,
+      "scanner": "Aprovação simulada; HTTP e navegador reais",
+      "exit_code": 0,
+      "nenhum_certificado_gerado": true,
+      "porta_fechada_apos_ctrl_c": true
+    }
+  ],
+  "revisao_interface_e_senha": {
+    "data_utc": "2026-10-12T15:44:35.604831+00:00",
+    "senha_minima_caracteres": 9,
+    "senha_maxima_caracteres": 128,
+    "avisos_repetidos_removidos": [
+      "Telas de acesso",
+      "Cabeçalho",
+      "Página Segurança",
+      "Terminal"
+    ],
+    "cadastro_inicial_e_console": "Senha de 9 caracteres aceita e armazenada com Argon2id",
+    "cadastro_administrativo": "9 aceita; 8 recusada pelo navegador e pelo servidor",
+    "alteracao_senha": "9 aceita; 8 recusada; login com a nova senha e 2FA aprovado",
+    "redefinicao_console": "9 aceita; 8 recusada sem mudar a conta; sessões revogadas ao redefinir; 2FA preservado",
+    "pesquisa_previa": "NIST SP 800-63B-4 permite mínimo de 8 caracteres em senhas usadas apenas como parte de autenticação multifator. A mudança para 9 conserva o segundo fator obrigatório; esta referência de comprimento não constitui alegação de conformidade de todo o sistema.",
+    "fonte": "https://pages.nist.gov/800-63-4/sp800-63b.html#passwordver"
+  },
+  "armazenamento_credenciais": {
+    "banco": "dados/login.sqlite3",
+    "tabela": "usuarios",
+    "identificador": "nome de usuário; sem campo email",
+    "campo_senha": "senha_hash",
+    "algoritmo": "Argon2id",
+    "senha_original_em_texto_puro": false,
+    "segredo_2fa": "Criptografado no banco; chave em dados/chave_2fa.key",
+    "dados_de_usuarios_no_zip": false
+  },
+  "pesquisa_previa_inicializacao": {
+    "fontes": [
+      "https://cheatsheetseries.owasp.org/cheatsheets/Password_Storage_Cheat_Sheet.html",
+      "https://www.sqlite.org/onefile.html"
+    ],
+    "decisao": "Reutilizar a criação de conta existente, validações de 9–128 caracteres, hash Argon2id e auditoria do console. A pergunta altera o fluxo local e não cria endpoint público de cadastro."
+  }
+}

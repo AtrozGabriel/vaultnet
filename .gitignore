@@ -1,0 +1,8 @@
+dados/
+__pycache__/
+.venv/
+.venv-anterior-*/
+wheelhouse/
+*.pyc
+.ruff_cache/
+.pytest_cache/

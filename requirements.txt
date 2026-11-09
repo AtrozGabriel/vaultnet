@@ -1,0 +1,2 @@
+# Instalação pela internet usa as mesmas versões, dependências e hashes do modo offline.
+-r requirements.lock

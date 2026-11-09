@@ -1,0 +1,127 @@
+{% from 'macros.html' import icon, csrf, nav with context %}
+{% set autenticado = sessao and sessao.etapa == 'autenticada' %}
+{% set acesso = tipo in ['login','segundo_fator','configuracao','recuperacao','reautenticacao'] or not autenticado %}
+{% set titulos = {'painel':'Visão geral','arquivos':('Todos os arquivos' if todos_arquivos else ('Compartilhados comigo' if compartilhados else 'Meus arquivos')),'enviar':'Enviar arquivo','detalhe':'Detalhes do arquivo','lixeira':'Lixeira','armazenamento':'Armazenamento','administracao':'Usuários','registros':'Registros','acesso_rede':'Acesso à rede','perfil':'Meu perfil','seguranca':'Segurança','erro':'Não foi possível continuar'} %}
+<!DOCTYPE html>
+<html lang="pt-BR">
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <meta name="color-scheme" content="light dark">
+        <title>{{ titulos.get(tipo, 'Entrar') }} · VaultNet</title>
+        <link rel="icon"
+              type="image/svg+xml"
+              href="{{ url_for('static', filename='favicon.svg') }}">
+        <link rel="stylesheet"
+              href="{{ url_for('static', filename='estilo.css') }}">
+        <script src="{{ url_for('static', filename='interface.js') }}" defer></script>
+    </head>
+    <body class="{{ 'auth-body' if acesso else 'app-body' }}">
+        <a class="skip-link" href="#conteudo">Ir ao conteúdo</a>
+        {% if acesso %}
+            <div class="auth-layout">
+                <aside class="auth-aside">
+                    <a class="brand brand-light"
+                       href="{{ url_for('inicio') }}"><span class="brand-icon">{{ icon("shield") }}</span>VaultNet</a>
+                    <div class="auth-presentation">
+                        <p class="eyebrow light">SEUS DOCUMENTOS. SUA REDE.</p>
+                        <h2>
+                            Gestão controlada
+                            <br>
+                            de arquivos corporativos
+                        </h2>
+                        <p class="auth-intro">Documentos organizados em um só lugar, com acesso pela rede interna e permissões para cada pessoa.</p>
+                        <div class="auth-features">
+                            <div>
+                                {{ icon("network") }}
+                                <div><strong>Rede interna da empresa</strong><span>Origem conferida pelo servidor</span></div>
+                            </div>
+                            <div>
+                                {{ icon("lock") }}
+                                <div><strong>Verificação em dois fatores</strong><span>Senha e código do autenticador</span></div>
+                            </div>
+                            <div>
+                                {{ icon("shield") }}
+                                <div><strong>Controle de permissões</strong><span>Acesso de acordo com seu perfil</span></div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="auth-footer"><span class="status-dot"></span> Projetado para sua rede local</div>
+                </aside>
+                <main id="conteudo" class="auth-main">
+                    <div class="auth-card {{ 'auth-card-wide' if tipo == 'recuperacao' else '' }}">
+                        <a class="brand mobile-brand"
+                           href="{{ url_for('inicio') }}"><span class="brand-icon">{{ icon("shield") }}</span>VaultNet</a>
+                        {% block auth %}{% endblock %}
+                    </div>
+                </main>
+            </div>
+        {% else %}
+            <aside class="sidebar" id="sidebar" aria-label="Navegação principal">
+                <a class="brand" href="{{ url_for('painel') }}"><span class="brand-icon">{{ icon("shield") }}</span><span>VaultNet<small>Corporativo</small></span></a>
+                {% if "enviar" in permissoes %}<a class="upload-cta"
+   href="{{ url_for('arquivos.enviar') }}"><span class="plus">+</span>Enviar arquivo</a>{% endif %}
+                <nav>
+                    {{ nav('painel','dashboard','Início',tipo == 'painel') }}
+                    {{ nav('arquivos.lista','files','Meus arquivos',tipo in ['detalhe','enviar'] or (tipo == 'arquivos' and not compartilhados and not todos_arquivos)) }}
+                    {{ nav('arquivos.compartilhados','sharing','Compartilhados comigo',tipo == 'arquivos' and compartilhados) }}
+                    {{ nav('arquivos.armazenamento','storage','Armazenamento',tipo == 'armazenamento') }}
+                    {% if "excluir" in permissoes %}{{ nav('arquivos.lixeira','trash','Lixeira',tipo == 'lixeira') }}{% endif %}
+                    {% if "administrar" in permissoes %}<p class="nav-label">ADMINISTRAÇÃO</p>{{ nav('arquivos.todos','files','Todos os arquivos',tipo == 'arquivos' and todos_arquivos) }}{{ nav('administracao','users','Usuários',tipo == 'administracao') }}{{ nav('registros','files','Registros',tipo == 'registros') }}{{ nav('acesso_rede','network','Acesso à rede',tipo == 'acesso_rede') }}{% endif %}
+                    <p class="nav-label">MINHA CONTA</p>
+                    {{ nav('perfil','person','Meu perfil',tipo == 'perfil') }}
+                    {{ nav('seguranca','settings','Segurança',tipo == 'seguranca') }}
+                </nav>
+                <a class="storage-mini" href="{{ url_for('arquivos.armazenamento') }}">
+                    <div><strong>Armazenamento</strong><span>{{ armazenamento.percentual }}%</span></div>
+                    <progress value="{{ armazenamento.usado }}"
+                              max="{{ armazenamento.quota }}"
+                              aria-label="Armazenamento utilizado"></progress><small>{{ armazenamento.usado|tamanho }} de {{ armazenamento.quota|tamanho }}</small></a>
+                <div class="sidebar-account">
+                    <span class="avatar">{% if usuario.foto %}<img src="{{ url_for('foto_perfil') }}" alt="Sua foto de perfil">{% else %}{{ usuario.nome[:2]|upper }}{% endif %}</span>
+                    <div><strong>{{ usuario.nome }}</strong><small>{{ usuario.perfil|capitalize }}</small></div>
+                    <form method="post" action="{{ url_for('sair') }}">
+                        {{ csrf() }}<button class="icon-button"
+        title="Sair da conta"
+        aria-label="Sair da conta">{{ icon("logout") }}</button>
+                    </form>
+                </div>
+            </aside>
+            <div class="app-shell">
+                <header class="topbar">
+                    <button class="icon-button menu-toggle"
+                            type="button"
+                            data-menu
+                            aria-controls="sidebar"
+                            aria-expanded="false"
+                            aria-label="Abrir menu">{{ icon("menu") }}</button>
+                    <form class="global-search"
+                          method="get"
+                          action="{{ url_for('arquivos.lista') }}">
+                        {{ icon("search") }}<input name="q"
+       type="search"
+       placeholder="Pesquisar arquivos ou pessoas"
+       maxlength="80"
+       aria-label="Pesquisar arquivos ou pessoas">
+                    </form>
+                    <div class="topbar-actions">
+                        <span class="badge badge-green">{{ icon("shield") }} 2FA ativo</span><button class="icon-button"
+        type="button"
+        data-theme
+        aria-label="Alternar tema"
+        title="Alternar tema">{{ icon("moon") }}</button><a class="avatar"
+   href="{{ url_for('perfil') }}"
+   aria-label="Abrir meu perfil">{% if usuario.foto %}<img src="{{ url_for('foto_perfil') }}" alt="Sua foto de perfil">{% else %}{{ usuario.nome[:2]|upper }}{% endif %}</a>
+                    </div>
+                </header>
+                <main id="conteudo" class="app-main">
+                    <div class="page-heading"><div><p class="eyebrow">VAULTNET / {{ titulos.get(tipo, 'ÁREA INTERNA')|upper }}</p><h1>{{ titulos.get(tipo, 'Área interna') }}</h1><p>{% if tipo == "painel" %}Olá, {{ usuario.nome }}. Seus documentos e acessos em um só lugar.{% elif tipo == "arquivos" %}{{ 'Supervisione os documentos de todos os usuários.' if todos_arquivos else ('Documentos enviados por outras pessoas para você, seu setor, seu nível ou toda a equipe.' if compartilhados else 'Documentos enviados por você, privados ou compartilhados.') }}{% elif tipo == "administracao" %}Gerencie contas e acompanhe os eventos de acesso.{% elif tipo == "perfil" %}Confira sua conta, proteção e sessões.{% elif tipo == "enviar" %}Escolha um documento e defina quem pode acessá-lo.{% else %}Organização e controle na sua rede interna.{% endif %}</p></div>{% if tipo in ["painel","arquivos"] %}<a class="button" href="{{ url_for('arquivos.enviar') }}">{{ icon("upload") }} Enviar arquivo</a>{% endif %}</div>
+                    {% block conteudo %}{% endblock %}
+                    <footer class="app-footer">
+                        <span>VaultNet · Rede interna</span><span>Atendente · Supervisor · Administrador</span>
+                    </footer>
+                </main>
+            </div>
+        {% endif %}
+    </body>
+</html>

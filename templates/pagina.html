@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+{% from 'macros.html' import icon, csrf, vazio, status, file_name, tabela_arquivos, navegacao_paginas with context %}
+{% block auth %}
+    {% if tipo == "erro" %}
+        {% include "erro.html" %}
+    {% else %}
+        {% include "auth.html" %}
+    {% endif %}
+{% endblock %}
+{% block conteudo %}
+    {% if tipo == "painel" %}
+        {% include "painel.html" %}
+    {% elif tipo in ["arquivos","enviar","detalhe","lixeira","armazenamento"] %}
+        {% include "arquivos.html" %}
+    {% elif tipo == "administracao" %}
+        {% include "administracao.html" %}
+    {% elif tipo == "acesso_rede" %}
+        {% include "acesso_rede.html" %}
+    {% elif tipo == "registros" %}
+        {% include "registros.html" %}
+    {% elif tipo in ["perfil","seguranca"] %}
+        {% include "conta.html" %}
+    {% else %}
+        {% include "erro.html" %}
+    {% endif %}
+{% endblock %}

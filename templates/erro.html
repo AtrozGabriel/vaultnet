@@ -1,0 +1,2 @@
+<section class="card error-card"><span class="auth-emblem danger">{{ icon("info") }}</span><p class="eyebrow">SOLICITAÇÃO {{ status }}</p><h2>Não foi possível continuar</h2><p class="subtitle">{{ mensagem }}</p><div class="button-row"><a class="button" href="{{ url_for('inicio') }}">Voltar ao início</a>{% if autenticado %}<a class="button button-secondary"
+   href="{{ url_for('confirmar_acesso') }}">Confirmar acesso</a>{% endif %}</div></section>
